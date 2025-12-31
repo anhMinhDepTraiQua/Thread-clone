@@ -3,7 +3,7 @@ import InteractionBar from "./InteractionBar";
 
 export default function PostCard({ post, onLike }) {
   return (
-    <article className="bg-white dark:bg-[#1c1e21] rounded-xl p-4 shadow-sm mb-4">
+    <article className="bg-white dark:bg-[#1c1e21] px-[24px] py-[16px] shadow-sm border-b border-l border-r border-gray-200 dark:border-gray-700">
       <div className="flex gap-3">
         <img
           src={post.user.avatar || `https://i.pravatar.cc/40?u=${post.user.id}`}

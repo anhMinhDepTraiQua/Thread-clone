@@ -1,13 +1,11 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "@/pages/Home";
+import { BrowserRouter } from "react-router-dom";
+import AppContent from "./AppContent";
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-      </Routes>
+    <BrowserRouter basename="/thread-clone">
+      <AppContent />
     </BrowserRouter>
   );
 }

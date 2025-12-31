@@ -1,26 +1,32 @@
 import React, { useEffect } from "react";
-import DefaultLayout from "@/components/layouts/DefaultLayout";
-import FeedHeader from "@/components/FeedHeader";
 import PostCard from "@/components/post/PostCard";
+import WhatAreYouThinking from "@/components/post/WhatAreYouThinking";
+import FeedHeader from "@/components/FeedHeader";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchPosts, toggleLike } from "@/components/post/postsSlice";
 
-function transformPosts(apiPosts) {
-  // nếu dùng jsonplaceholder chuyển thành cấu trúc nhỏ
+function transformPosts(apiPosts = []) {
   return apiPosts.map((p) => ({
     id: p.id,
-    user: { id: p.userId || p.id, name: `User ${p.userId || p.id}`, avatar: null },
-    time: "2h",
-    content: p.body || p.content || "",
-    media: [],
-    stats: { likes: Math.floor(Math.random() * 1000), comments: Math.floor(Math.random() * 200), reposts: Math.floor(Math.random() * 50) },
+    user: {
+      id: p.user.id,
+      name: p.user.name,
+      avatar: p.user.avatar || null,
+    },
+    time: new Date(p.created_at).toLocaleString(),
+    content: p.content,
+    media: p.media_urls || [],
+    stats: {
+      likes: p.likes_count,
+      comments: p.replies_count,
+      reposts: p.reposts_and_quotes_count,
+    },
   }));
 }
 
 export default function Home() {
   const dispatch = useDispatch();
-  const postsState = useSelector((s) => s.posts);
-  const { items, status } = postsState;
+  const { items, status } = useSelector((s) => s.posts);
 
   useEffect(() => {
     if (status === "idle") {
@@ -28,23 +34,37 @@ export default function Home() {
     }
   }, [dispatch, status]);
 
-  // nếu API khác: map data
-  const posts = items && items.length > 0 && items[0] && items[0].body ? transformPosts(items) : items;
+  // ⚠️ QUAN TRỌNG: items.data mới là array
+  const posts = transformPosts(items?.data || []);
 
   const handleLike = (id) => {
     dispatch(toggleLike(id));
-    // optional: call API to persist like
   };
-
+  //khi chưa đăng nhập sẽ ẩn "WhatAreYouThinking" đi
+  function isAuthenticated() {
+    const user = localStorage.getItem("user");
+    return !!user; // Trả về true nếu có user, false nếu không có
+  }
   return (
-    <DefaultLayout>
+    <div>
       <FeedHeader title="Home" />
-      <div className="mt-4">
-        {status === "loading" && <div className="text-center py-10">Loading...</div>}
-        {status === "failed" && <div className="text-center py-10 text-red-500">Error loading posts</div>}
+      {isAuthenticated() && <WhatAreYouThinking />}
+      <div>
+        {status === "loading" && (
+          <div className="text-center py-10">Loading...</div>
+        )}
 
-        {posts && posts.map((p) => <PostCard key={p.id} post={p} onLike={handleLike} />)}
+        {status === "failed" && (
+          <div className="text-center py-10 text-red-500">
+            Error loading posts
+          </div>
+        )}
+
+        {posts.map((p) => (
+          <PostCard key={p.id} post={p} onLike={handleLike} />
+        ))}
       </div>
-    </DefaultLayout>
+    </div>
   );
 }
+
