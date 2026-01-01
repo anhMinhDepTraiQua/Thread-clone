@@ -10,6 +10,7 @@ export default function AuthLayout() {
         backgroundRepeat: "no-repeat",
         backgroundPosition: "top center",
         backgroundSize: "contain",
+        backgroundSize: "85%",
       }}>
     <Routes>
       <Route path="/login" element={<Login />} />

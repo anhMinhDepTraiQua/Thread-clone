@@ -3,17 +3,15 @@ import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://threads.f8team.dev";
 
-// Hàm lấy token
 const getAccessToken = () => localStorage.getItem("accessToken");
 const getRefreshToken = () => localStorage.getItem("refreshToken");
 
-// Tạo instance
 const axiosClient = axios.create({
   baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 15000, // 15s timeout request
+  timeout: 15000,
 });
 
 // REQUEST INTERCEPTOR
@@ -22,7 +20,6 @@ axiosClient.interceptors.request.use(
     const token = getAccessToken();
     if (token) config.headers.Authorization = `Bearer ${token}`;
 
-    // nếu body là FormData thì bỏ header JSON
     if (config.data instanceof FormData) {
       delete config.headers["Content-Type"];
     }
@@ -44,11 +41,11 @@ const processQueue = (error, token = null) => {
 };
 
 axiosClient.interceptors.response.use(
-  (response) => response.data, // trả về payload thôi
+  (response) => response.data,
   async (error) => {
     const originalConfig = error.config;
 
-    // Token hết hạn → refresh
+    // Token expired → refresh
     if (error.response?.status === 401 && !originalConfig._retry) {
       originalConfig._retry = true;
 
@@ -66,14 +63,12 @@ axiosClient.interceptors.response.use(
           processQueue(null, accessToken);
           isRefreshing = false;
 
-          // gắn token mới vào request bị lỗi và gửi lại
           originalConfig.headers.Authorization = `Bearer ${accessToken}`;
           return axiosClient(originalConfig);
         } catch (err) {
           processQueue(err, null);
           isRefreshing = false;
 
-          // logout
           localStorage.clear();
           window.location.href = "/login";
           return Promise.reject(err);
@@ -85,13 +80,12 @@ axiosClient.interceptors.response.use(
       });
     }
 
-    // Các lỗi còn lại
-    const msg = error?.response?.data?.message || error.message || "Lỗi không xác định";
-    return Promise.reject(msg);
+    // For other errors, return the full error object so we can access error.response.data
+    // Don't just return a string message
+    return Promise.reject(error);
   },
 );
 
-// EXPORT dạng tiện dùng
 export const httpRequest = {
   get: (url, params) => axiosClient.get(url, { params }),
   post: (url, body) => axiosClient.post(url, body),

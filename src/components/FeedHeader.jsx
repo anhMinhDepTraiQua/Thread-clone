@@ -5,9 +5,7 @@ export default function FeedHeader({ title }) {
       <h1 className="text-lg font-semibold text-center p-[16px]">
         {title}
       </h1>
-      {/* thêm 2 div rỗng bên trái và bên phải của title để che viền của feed khi scroll */}
-      <div className="absolute left-0 top-0 bottom-0 w-[25px] bg-white dark:bg-[rgb(16,16,16)] z-20" />
-      <div className="absolute right-0 top-0 bottom-0 w-[25px] bg-white dark:bg-[rgb(16,16,16)] z-20" />
+
       {/* Border bottom (chỉ hiện khi scroll) */}
       <div
         className={`absolute left-[25px] bottom-0 h-[10px] w-[calc(100%-50px)]

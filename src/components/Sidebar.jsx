@@ -2,8 +2,8 @@ import { NavLink } from "react-router-dom";
 export default function Sidebar() {
    const linkClass = ({ isActive }) =>
     isActive
-      ? "text-white-500 font-semibold pb-1"
-      : "text-gray-600 hover:text-white-500";
+      ? "text-white font-semibold pb-1"
+      : "text-gray-600 hover:text-white";
   return (
     <div className="w-[76px] h-screen flex flex-col justify-between items-center sticky top-0 z-[100] isolate">
       {/* phía trên của sidebar */}
@@ -31,10 +31,9 @@ export default function Sidebar() {
             <i className="fa-solid fa-magnifying-glass text-2xl"></i>
           </NavLink>
 
-          <button className={({ isActive }) =>
-          `${linkClass({ isActive })} w-15 h-10 flex items-center justify-center rounded-[10px] transition-all duration-200 transform hover:scale-105 hover:bg-gray-200 dark:hover:bg-gray-700`
+          <button className={"w-15 h-10 flex items-center justify-center rounded-[10px] transition-all duration-200 transform text-gray-600 bg-gray-200 dark:bg-gray-700 cursor-pointer hover:text-white"
             }>
-            <i className="fa-solid fa-plus text-2xl"></i>
+            <i className="fa-solid fa-plus text-2xl "></i>
           </button>
 
           <NavLink
@@ -58,10 +57,8 @@ export default function Sidebar() {
 
         {/* phía dưới của sidebar */}
       <div className="flex flex-col gap-4 mb-[22px]">
-        <button>
-          <i className="fa-solid fa-thumbtack"></i>
-        </button>
-        <button>
+        <button className={"flex items-center justify-center transition-all duration-200 transform text-gray-600 cursor-pointer hover:text-white"
+            }>
           <i className="fa-solid fa-bars text-2xl"></i>
         </button>
       </div>
