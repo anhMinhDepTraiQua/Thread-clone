@@ -9,6 +9,8 @@ import Profile from "@/pages/Profile";
 import Login from "@/pages/Auth/Login";
 import Register from "@/pages/Auth/Register";
 import ForgotPassword from "@/pages/Auth/ForgotPassword";
+import ModalLayout from "@/components/post/Modal";
+import CreatePost from "@/components/post/CreatePost";
 export default function AppContent() {
   const { pathname } = useLocation();
 
@@ -37,6 +39,10 @@ return (
       <Route path="/login" element={<Login />} />
       <Route path="/Register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+    </Route>
+    {/* Nhóm các trang sử dụng ModalLayout */}
+    <Route element={<ModalLayout />}>
+      <Route path="/CreatePost" element={<CreatePost />} />
     </Route>
   </Routes>
 );
