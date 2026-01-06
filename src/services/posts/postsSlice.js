@@ -1,73 +1,181 @@
-// postsSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:5173/api"; 
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000/api";
+
+// Fetch posts từ service (giữ nguyên)
+import postsService from "@/services/posts";
 
 export const fetchPosts = createAsyncThunk(
   "posts/fetchPosts",
-  async (page = 1, { rejectWithValue }) => {
+  async ({ page = 1, maxId = null }, thunkAPI) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/posts?page=${page}`);
+      const res = await postsService.getPosts(page, 10, "for_you", maxId);
+      
+      console.log(`fetchPosts thunk - Raw response:`, res.data);
+      
+      let data = res.data?.data || res.data;
+      
       return {
-        data: response.data.data,
-        currentPage: page,
-        hasMore: response.data.data.length > 0, // Kiểm tra còn data không
+        data: data,
+        page,
+        hasMore: Array.isArray(data) ? data.length > 0 : false,
       };
-    } catch (error) {
-      return rejectWithValue(error.response.data);
+    } catch (err) {
+      console.error("fetchPosts error:", err);
+      return thunkAPI.rejectWithValue(err.response?.data || err.message);
     }
   }
 );
+
+// Toggle like - INLINE API call để tránh import error
 export const toggleLike = createAsyncThunk(
   "posts/toggleLike",
-  async (postId, { rejectWithValue }) => {
+  async (postId, thunkAPI) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/posts/${postId}/like`);
-      return { postId, liked: response.data.liked };
-    } catch (error) {
-      return rejectWithValue(error.response.data);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication required");
+      }
+
+      console.log(`toggleLike API request for post ${postId}`);
+
+      // Dùng axios trực tiếp thay vì qua service
+      const response = await axios.post(
+        `${API_BASE_URL}/posts/${postId}/like`,
+        {}, // Empty body
+        {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      
+      console.log(`toggleLike API response for post ${postId}:`, response.data);
+      
+      return { 
+        postId,
+        isLiked: response.data?.is_liked,
+        likesCount: response.data?.likes_count
+      };
+    } catch (err) {
+      console.error("toggleLike API error:", err);
+      return thunkAPI.rejectWithValue(err.response?.data || err.message);
     }
   }
 );
+
 const postsSlice = createSlice({
   name: "posts",
   initialState: {
     items: { data: [] },
     status: "idle",
     error: null,
-    currentPage: 1,
+    currentPage: 0,
     hasMore: true,
+    consecutiveDuplicates: 0,
+    maxDuplicateRetries: 10, // Tăng lên 10 lần thử (tạm thời)
   },
   reducers: {
-    resetPosts: (state) => {
+    resetPosts(state) {
       state.items = { data: [] };
-      state.currentPage = 1;
-      state.hasMore = true;
       state.status = "idle";
+      state.currentPage = 0;
+      state.hasMore = true;
+      state.error = null;
+      state.consecutiveDuplicates = 0;
     },
   },
   extraReducers: (builder) => {
     builder
+      // Fetch posts
       .addCase(fetchPosts.pending, (state) => {
         state.status = "loading";
       })
       .addCase(fetchPosts.fulfilled, (state, action) => {
+        console.log("fetchPosts.fulfilled - Before update:", {
+          currentPage: state.currentPage,
+          newPage: action.payload.page,
+          newPostsCount: (action.payload.data || []).length
+        });
+        
         state.status = "succeeded";
-        // Append new posts to existing ones
-        state.items.data = [...state.items.data, ...action.payload.data];
-        state.currentPage = action.payload.currentPage;
+        state.currentPage = action.payload.page;
         state.hasMore = action.payload.hasMore;
+        
+        const newPosts = action.payload.data || [];
+        
+        console.log(`Page ${action.payload.page} post IDs:`, 
+          newPosts.slice(0, 5).map(p => p.id)
+        );
+        
+        if (action.payload.page === 1) {
+          state.items.data = newPosts;
+          console.log("Loaded page 1 with", newPosts.length, "posts");
+        } else {
+          console.log("Existing post IDs:", 
+            state.items.data.slice(0, 5).map(p => p.id)
+          );
+          
+          const existingIds = new Set(state.items.data.map(p => p.id));
+          const uniqueNewPosts = newPosts.filter(p => !existingIds.has(p.id));
+          
+          console.log(`Duplicates found: ${newPosts.length - uniqueNewPosts.length}`);
+          console.log("Unique new post IDs:", uniqueNewPosts.map(p => p.id));
+          
+          if (uniqueNewPosts.length > 0) {
+            state.items.data = [...state.items.data, ...uniqueNewPosts];
+            state.consecutiveDuplicates = 0;
+            console.log(`Page ${action.payload.page}: Added ${uniqueNewPosts.length} new posts. Total: ${state.items.data.length}`);
+          } else {
+            state.consecutiveDuplicates += 1;
+            console.warn(`All posts are duplicates (attempt ${state.consecutiveDuplicates}/${state.maxDuplicateRetries})`);
+          }
+          
+          if (newPosts.length < 10) {
+            state.hasMore = false;
+            console.log("No more posts available (API returned less than per_page)");
+          } else if (state.consecutiveDuplicates >= state.maxDuplicateRetries) {
+            state.hasMore = false;
+            console.error(`Stopped after ${state.consecutiveDuplicates} consecutive duplicate pages. Backend pagination may be broken.`);
+          }
+        }
+        
+        console.log("fetchPosts.fulfilled - After update:", {
+          currentPage: state.currentPage,
+          hasMore: state.hasMore,
+          totalPosts: state.items.data.length
+        });
       })
       .addCase(fetchPosts.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
       })
+      // Toggle like
+      .addCase(toggleLike.pending, (state, action) => {
+        console.log("toggleLike.pending:", action.meta.arg);
+      })
       .addCase(toggleLike.fulfilled, (state, action) => {
-        const post = state.items.data.find((p) => p.id === action.payload.postId);
+        const { postId, isLiked, likesCount } = action.payload;
+        const post = state.items.data?.find((p) => p.id === postId);
+        
         if (post) {
-          post.likes_count += action.payload.liked ? 1 : -1;
+          if (isLiked !== undefined) {
+            post.is_liked = isLiked;
+          }
+          if (likesCount !== undefined) {
+            post.likes_count = likesCount;
+          }
+          
+          console.log(`toggleLike.fulfilled: Post ${postId} synced with server`, {
+            isLiked: post.is_liked,
+            likesCount: post.likes_count
+          });
         }
+      })
+      .addCase(toggleLike.rejected, (state, action) => {
+        console.error("toggleLike.rejected:", action.payload);
       });
   },
 });

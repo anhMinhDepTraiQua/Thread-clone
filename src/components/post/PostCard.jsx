@@ -1,15 +1,26 @@
+import { useState, useRef, useEffect } from "react"; // Thêm useRef và useEffect để đóng menu khi click ngoài
 import React from "react";
 import InteractionBar from "./InteractionBar";
 
 export default function PostCard({ post, onLike }) {
-  
-  // Render media grid với layout thông minh
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  // Đóng menu khi click ra ngoài vùng menu
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const renderImages = () => {
     if (!post.images || post.images.length === 0) return null;
-
     const imageCount = post.images.length;
 
-    // 1 ảnh: full width
     if (imageCount === 1) {
       return (
         <div className="mt-3 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800">
@@ -23,7 +34,6 @@ export default function PostCard({ post, onLike }) {
       );
     }
 
-    // 2 ảnh: 2 cột
     if (imageCount === 2) {
       return (
         <div className="mt-3 grid grid-cols-2 gap-2 rounded-lg overflow-hidden">
@@ -40,7 +50,6 @@ export default function PostCard({ post, onLike }) {
       );
     }
 
-    // 3 ảnh: 1 ảnh lớn bên trái, 2 ảnh nhỏ bên phải
     if (imageCount === 3) {
       return (
         <div className="mt-3 grid grid-cols-2 gap-2 rounded-lg overflow-hidden" style={{ height: '400px' }}>
@@ -65,7 +74,6 @@ export default function PostCard({ post, onLike }) {
       );
     }
 
-    // 4+ ảnh: grid 2x2, ảnh thứ 4 có overlay nếu có nhiều hơn 4 ảnh
     return (
       <div className="mt-3 grid grid-cols-2 gap-2 rounded-lg overflow-hidden">
         {post.images.slice(0, 4).map((img, idx) => (
@@ -90,33 +98,22 @@ export default function PostCard({ post, onLike }) {
     );
   };
 
-  // Render audio files
   const renderAudio = () => {
     if (!post.audio || post.audio.length === 0) return null;
-
     return (
       <div className="mt-3 space-y-2">
         {post.audio.map((audioUrl, idx) => (
           <div key={idx} className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
             <div className="flex items-center gap-2 mb-2">
-              <svg 
-                className="w-5 h-5 text-blue-500" 
-                fill="currentColor" 
-                viewBox="0 0 20 20"
-              >
+              <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
               </svg>
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Audio {post.audio.length > 1 ? `${idx + 1}` : ''}
               </span>
             </div>
-            <audio 
-              controls 
-              className="w-full h-10"
-              preload="metadata"
-            >
+            <audio controls className="w-full h-10" preload="metadata">
               <source src={audioUrl} />
-              Your browser does not support the audio element.
             </audio>
           </div>
         ))}
@@ -124,13 +121,9 @@ export default function PostCard({ post, onLike }) {
     );
   };
 
-  // Fallback cho old media format
   const renderLegacyMedia = () => {
     if (!post.media || post.media.length === 0) return null;
-    if ((post.images && post.images.length > 0) || (post.audio && post.audio.length > 0)) {
-      return null;
-    }
-
+    if ((post.images && post.images.length > 0) || (post.audio && post.audio.length > 0)) return null;
     return (
       <div className="mt-3">
         <img 
@@ -142,14 +135,19 @@ export default function PostCard({ post, onLike }) {
       </div>
     );
   };
- const handleLike = async (postId, newIsLiked) => {
-    // Gọi callback từ parent component (Home)
-    if (onLike) {
-      await onLike(postId, newIsLiked);
-    }
+
+  const handleLike = async (postId, newIsLiked) => {
+    if (onLike) await onLike(postId, newIsLiked);
   };
+
+  const menuItems = [
+    { label: "Lưu bài viết"},
+    { label: "Giao diện", hasSub: true},
+    { label: "Xóa bài viết", color: "text-red-500"},
+  ];
+
   return (
-    <article className="bg-white dark:bg-[#1c1e21] px-[24px] py-[16px] shadow-sm border-b border-l border-r border-gray-200 dark:border-gray-700 overflow-hidden">
+    <article className="bg-white dark:bg-[#1c1e21] px-[24px] py-[16px] shadow-sm border-b border-l border-r border-gray-200 dark:border-gray-700 overflow-visible relative">
       <div className="flex gap-3">
         {/* Avatar Section */}
         <div className="flex-shrink-0">
@@ -161,7 +159,7 @@ export default function PostCard({ post, onLike }) {
         </div>
 
         {/* Content Section */}
-        <div className="flex-1 min-w-0"> {/* Thêm min-w-0 cực kỳ quan trọng cho flex-item */}
+        <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
@@ -173,29 +171,68 @@ export default function PostCard({ post, onLike }) {
                 </span>
               </div>
             </div>
-            {/* menu dots */}
-            <button className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition ml-2">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-              </svg>
-            </button>
+
+            {/* --- MENU DOTS CONTAINER --- */}
+            <div className="relative" ref={menuRef}>
+              <button 
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="flex-shrink-0 p-1 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition hover:bg-gray-100 dark:hover:bg-gray-800 "
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                </svg>
+              </button>
+
+              {/* Dropdown Box */}
+                      {isMenuOpen && (
+                      <>
+                        <style>{`
+                        @keyframes menuEnter {
+                          from { opacity: 0; transform: translateY(-6px) scale(.95); }
+                          to   { opacity: 1; transform: translateY(0) scale(1); }
+                        }
+                        `}</style>
+
+                        <div
+                        className="absolute right-0 mt-2 w-30 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-10 overflow-hidden"
+                        style={{ animation: 'menuEnter 150ms ease-out forwards' }}
+                        >
+                        <div className="py-1">
+                          {menuItems.map((item, index) => (
+                          <button 
+                            key={index}
+                            className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors"
+                            onClick={() => {
+                            setIsMenuOpen(false);
+                            if (item.fn) item.fn();
+                            }}
+                          >
+                            <span className={item.color || ""}>{item.label}</span>
+                            {item.icon && <i className={`fa-solid ${item.icon} text-xs opacity-60`}></i>}
+                          </button>
+                          ))}
+                        </div>
+                        </div>
+                      </>
+                      )}
+                    </div>
+                    {/* --- END MENU DOTS --- */}
           </div>
 
-          {/* Sửa chính ở đây: Thêm break-words và min-w-0 */}
           <p className="mt-2 text-sm leading-relaxed text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words">
             {post.content}
           </p>
 
-          {/* Render media */}
           {renderImages()}
           {renderAudio()}
           {renderLegacyMedia()}
-      <InteractionBar 
-        stats={post.stats}
-        isLiked={post.isLiked}
-        postId={post.id}
-        onLike={handleLike}
-      />
+
+          <InteractionBar 
+            stats={post.stats}
+            isLiked={post.isLiked}
+            postId={post.id}
+            onLike={handleLike}
+          />
         </div>
       </div>
     </article>

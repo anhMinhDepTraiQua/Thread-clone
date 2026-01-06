@@ -13,6 +13,7 @@ import ResetPassword from "@/pages/Auth/ResetPassword";
 import ModalLayout from "@/components/post/Modal";
 import CreatePost from "@/components/post/CreatePost";
 import EditProfileModal from "./components/EditProfile";
+import ReplyModal from "./components/post/ReplyModal";
 export default function AppContent() {
 return (
   <Routes>
@@ -36,6 +37,7 @@ return (
     <Route element={<ModalLayout />}>
       <Route path="/CreatePost" element={<CreatePost />} />
       <Route path="/EditProfile" element={<EditProfileModal />} />
+      <Route path="/ReplyModal" element={<ReplyModal />} />
     </Route>
   </Routes>
 );

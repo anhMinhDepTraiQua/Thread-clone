@@ -8,6 +8,7 @@ import useInfiniteScroll from "@/services/hooks/useInfiniteScroll";
 
 function transformPosts(apiPosts = []) {
   return apiPosts.map((p) => {
+    // Xử lý media urls - có thể là array hoặc string JSON
     let mediaUrls = [];
     if (p.media_urls) {
       if (Array.isArray(p.media_urls)) {
@@ -20,6 +21,8 @@ function transformPosts(apiPosts = []) {
         }
       }
     }
+
+    // Phân loại media thành images và audio
     const images = [];
     const audio = [];
 
@@ -83,7 +86,7 @@ export default function Home() {
   useEffect(() => {
     if (status === "idle") {
       console.log("Initial load: Fetching page 1");
-      dispatch(fetchPosts(1));
+      dispatch(fetchPosts({ page: 1, maxId: null }));
     }
   }, [dispatch, status]);
 
@@ -91,10 +94,21 @@ export default function Home() {
   const loadMorePosts = useCallback(() => {
     if (status !== "loading" && hasMore) {
       const nextPage = currentPage + 1;
-      console.log(`Loading more posts: Current page ${currentPage}, Next page ${nextPage}`);
-      dispatch(fetchPosts(nextPage));
+      
+      // Lấy ID của post cuối cùng để dùng làm cursor
+      const lastPostId = items?.data?.[items.data.length - 1]?.id;
+      
+      console.log(`Loading more posts: Current page ${currentPage}, Next page ${nextPage}, Last post ID: ${lastPostId}`);
+      
+      // Thử cursor-based pagination trước
+      if (lastPostId) {
+        dispatch(fetchPosts({ page: nextPage, maxId: lastPostId }));
+      } else {
+        // Fallback to page-based
+        dispatch(fetchPosts({ page: nextPage, maxId: null }));
+      }
     }
-  }, [dispatch, status, hasMore, currentPage]);
+  }, [dispatch, status, hasMore, currentPage, items]);
 
   // Sử dụng infinite scroll hook với options tùy chỉnh
   const sentinelRef = useInfiniteScroll(

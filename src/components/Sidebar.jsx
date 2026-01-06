@@ -57,7 +57,7 @@ export default function Sidebar() {
     { label: "Đã lưu", icon: null },
     { label: "Đã thích", icon: null },
     { label: "Báo cáo sự cố", icon: null, borderTop: true },
-    { label: "Đăng xuất", icon: null, color: "text-red-600", fn: logout }, // ← Fixed: Không có ()
+    { label: "Đăng xuất", icon: null, color: "text-red-600", fn: logout },
   ];
 
   return (
@@ -132,7 +132,6 @@ export default function Sidebar() {
               <button 
                 className="w-full flex items-center justify-between px-4 py-3 text-[15px] cursor-pointer font-medium text-[#f3f5f7] transition-colors hover:rounded hover:bg-[#242424] ml-[10px]"
                 onClick={() => {
-                  // ✅ Fixed: Kiểm tra và gọi hàm nếu tồn tại
                   if (item.fn) {
                     item.fn();
                   }
