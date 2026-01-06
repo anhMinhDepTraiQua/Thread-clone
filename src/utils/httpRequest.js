@@ -53,24 +53,27 @@ axiosClient.interceptors.response.use(
         isRefreshing = true;
         const refresh = getRefreshToken();
         try {
-          const res = await axios.post(`${BASE_URL}/auth/refresh-token`, {
+          const res = await axios.post(`${BASE_URL}/api/auth/refresh-token`, {
             refresh_token: refresh,
           });
 
-          const { accessToken } = res.data.data;
-          localStorage.setItem("accessToken", accessToken);
+          // API có thể trả về access_token (snake_case)
+          const { access_token, accessToken } = res.data.data || res.data;
+          const newToken = access_token || accessToken;
+          
+          localStorage.setItem("accessToken", newToken);
 
-          processQueue(null, accessToken);
+          processQueue(null, newToken);
           isRefreshing = false;
 
-          originalConfig.headers.Authorization = `Bearer ${accessToken}`;
+          originalConfig.headers.Authorization = `Bearer ${newToken}`;
           return axiosClient(originalConfig);
         } catch (err) {
           processQueue(err, null);
           isRefreshing = false;
 
           localStorage.clear();
-          window.location.href = "/login";
+          window.location.href = "/thread-clone/login";
           return Promise.reject(err);
         }
       }
@@ -80,8 +83,6 @@ axiosClient.interceptors.response.use(
       });
     }
 
-    // For other errors, return the full error object so we can access error.response.data
-    // Don't just return a string message
     return Promise.reject(error);
   },
 );

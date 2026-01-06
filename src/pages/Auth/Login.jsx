@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [loginValue, setLoginValue] = useState("");  // email / username
+  const [loginValue, setLoginValue] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -15,18 +15,35 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await authService.login({
+      // authService.login trả về response.data (do interceptor)
+      const responseData = await authService.login({
         login: loginValue,      
         password: password,
       });
 
-      const { accessToken, refreshToken, user } = res.data;
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
+      console.log("🔍 Response data:", responseData);
+
+      // API trả về: { success, message, data: { user, access_token, refresh_token, expires_in } }
+      const { access_token, refresh_token, user } = responseData.data;
+
+      console.log("📦 Extracted:", { access_token, refresh_token, user });
+
+      if (!access_token) {
+        throw new Error("No access token received from server");
+      }
+
+      // Lưu vào localStorage với key đúng
+      localStorage.setItem("accessToken", access_token);
+      localStorage.setItem("refreshToken", refresh_token);
       localStorage.setItem("user", JSON.stringify(user));
+
+      console.log("✅ Login successful!");
+      console.log("Saved accessToken:", localStorage.getItem("accessToken"));
+
       navigate("/"); 
     } catch (err) {
-      setError(err?.response?.data?.message || "Login failed");
+      console.error("❌ Login error:", err);
+      setError(err?.response?.data?.message || err.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -42,15 +59,14 @@ export default function Login() {
           Log in with your Instagram account
         </h2>
 
-        {/* FIX: Add onSubmit */}
         <form className="space-y-3" onSubmit={handleSubmit}>
           <input
             type="text"
             placeholder="email"
             value={loginValue}
-            onChange={(e) => setLoginValue(e.target.value)}   // FIX
+            onChange={(e) => setLoginValue(e.target.value)}
             className="w-full h-12 px-4 rounded-xl bg-gray-100 text-sm outline-none focus:ring-2 focus:ring-black/20"
-            autoComplete="email"                               // FIX console warning
+            autoComplete="email"
           />
 
           <input
@@ -59,7 +75,7 @@ export default function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full h-12 px-4 rounded-xl bg-gray-100 text-sm outline-none focus:ring-2 focus:ring-black/20"
-            autoComplete="current-password"                    // FIX console warning
+            autoComplete="current-password"
           />
 
           {/* Hiển thị lỗi */}
