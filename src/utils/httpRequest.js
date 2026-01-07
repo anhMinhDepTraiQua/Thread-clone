@@ -1,7 +1,8 @@
 // src/utils/axiosClient.js
 import axios from "axios";
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://threads.f8team.dev";
+import { navigationService } from "./navigation";
+const BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "https://threads.f8team.dev";
 
 const getAccessToken = () => localStorage.getItem("accessToken");
 const getRefreshToken = () => localStorage.getItem("refreshToken");
@@ -25,7 +26,7 @@ axiosClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => Promise.reject(error)
 );
 
 // RESPONSE INTERCEPTOR
@@ -60,7 +61,7 @@ axiosClient.interceptors.response.use(
           // API có thể trả về access_token (snake_case)
           const { access_token, accessToken } = res.data.data || res.data;
           const newToken = access_token || accessToken;
-          
+
           localStorage.setItem("accessToken", newToken);
 
           processQueue(null, newToken);
@@ -73,7 +74,7 @@ axiosClient.interceptors.response.use(
           isRefreshing = false;
 
           localStorage.clear();
-          window.location.href = "/thread-clone/login";
+          navigationService.navigateToLogin(); // Sử dụng service
           return Promise.reject(err);
         }
       }
@@ -84,7 +85,7 @@ axiosClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  },
+  }
 );
 
 export const httpRequest = {

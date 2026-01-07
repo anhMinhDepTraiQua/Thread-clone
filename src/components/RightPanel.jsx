@@ -1,3 +1,4 @@
+import { NavLink } from "react-router-dom";
 export default function RightPanel() {
   return (
     <div className="fixed top-15 z-100">
@@ -25,9 +26,9 @@ export default function RightPanel() {
           Continue with Instagram
         </button>
 
-        <a href="/thread-clone/login" className="mt-4 text-xs text-gray-400 cursor-pointer hover:underline">
+        <NavLink to="/login" className="mt-4 text-xs text-gray-400 cursor-pointer hover:underline">
           Log in with username instead
-        </a>
+        </NavLink>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "@/utils/httpRequest";
-
+import { NavLink } from "react-router-dom";
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -68,12 +68,12 @@ export default function ForgotPassword() {
         </form>
 
         <div className="mt-6 text-center">
-          <a
-            href="/thread-clone/login"
+          <NavLink
+            to="/login"
             className="text-sm text-gray-500 hover:underline"
           >
             Already have an account? Log in
-          </a>
+          </NavLink>
         </div>
       </div>
 

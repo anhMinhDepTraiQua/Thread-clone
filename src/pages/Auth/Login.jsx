@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { authService } from "@/services/auth";
 import { useNavigate } from "react-router-dom";
-
+import { NavLink } from "react-router-dom";
 export default function Login() {
   const navigate = useNavigate();
   const [loginValue, setLoginValue] = useState("");
@@ -91,12 +91,12 @@ export default function Login() {
         </form>
 
         <div className="mt-6 text-center flex gap-10 justify-center">
-          <a href="/thread-clone/forgot-password" className="text-sm text-gray-500 hover:underline">
+          <NavLink to="/forgot-password" className="text-sm text-gray-500 hover:underline">
             Forgot password?
-          </a>
-          <a href="/thread-clone/Register" className="text-sm text-gray-500 hover:underline">
+          </NavLink>
+          <NavLink to="/register" className="text-sm text-gray-500 hover:underline">
             Register
-          </a>
+          </NavLink>
         </div>
       </div>
 

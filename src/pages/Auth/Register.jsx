@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { httpRequest } from '@/utils/httpRequest';
-
+import { NavLink } from 'react-router';
 export default function Register() {
   const [formData, setFormData] = useState({
     displayName: '',
@@ -325,9 +325,9 @@ export default function Register() {
       )}
 
       <div className="mt-6 text-center">
-        <a href="/thread-clone/login" className="text-sm text-gray-500 hover:underline">
+        <NavLink to="/login" className="text-sm text-gray-500 hover:underline">
           Already have an account? Log in
-        </a>
+        </NavLink>
       </div>
     </div>
   );
