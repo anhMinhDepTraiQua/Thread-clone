@@ -4,7 +4,7 @@ import AppContent from "./AppContent";
 import ToastContainer from "./components/Toast";
 export default function App() {
   return (
-    <BrowserRouter basename="/thread-clone">
+    <BrowserRouter basename="/Thread-clone">
       <AppContent />
           {/* Toast Container - đặt ở đây để hiển thị trên toàn app */}
           <ToastContainer />

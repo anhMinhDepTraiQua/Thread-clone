@@ -5,11 +5,10 @@ import path from 'path'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: "/thread-clone",
+  base: "/Thread-clone",
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
-  base: "/thread-clone",
 })
