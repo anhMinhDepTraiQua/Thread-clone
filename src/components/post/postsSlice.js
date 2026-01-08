@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import postsService from "@/services/posts";
+import postService from "@/services/posts";
 
 export const fetchPosts = createAsyncThunk(
   "posts/fetchPosts",
   async (page = 1, thunkAPI) => {
     try {
-      const res = await postsService.getPosts(page);
+      const res = await postService.getPosts(page);
       
       console.log(`fetchPosts thunk - Raw response for page ${page}:`, res.data);
       
@@ -29,7 +29,7 @@ export const toggleLike = createAsyncThunk(
   async (postId, thunkAPI) => {
     try {
       // Call API
-      const response = await postsService.toggleLike(postId);
+      const response = await postService.toggleLike(postId);
       
       console.log(`toggleLike API response for post ${postId}:`, response.data);
       

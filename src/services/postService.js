@@ -1,6 +1,6 @@
 import api from "@/services/index"; // ✅ Import từ index.js
 
-const postsService = {
+const postService = {
   /**
    * Lấy danh sách posts với pagination
    * @param {number} page - Số trang cần lấy
@@ -11,7 +11,7 @@ const postsService = {
    */
   getPosts: async (page = 1, perPage = 10, type = "for_you", maxId = null) => {
     try {
-      console.log(`📤 postsService.getPosts:`, { page, perPage, type, maxId });
+      console.log(`📤 postService.getPosts:`, { page, perPage, type, maxId });
       
       // ✅ Gọi API từ index.js với params đúng format
       const response = await api.getPosts({
@@ -21,7 +21,7 @@ const postsService = {
         max_id: maxId,
       });
       
-      console.log(`📥 postsService.getPosts response:`, {
+      console.log(`📥 postService.getPosts response:`, {
         postCount: response.data?.data?.length || response.data?.length,
         firstPostId: response.data?.data?.[0]?.id,
         lastPostId: response.data?.data?.[response.data.data?.length - 1]?.id,
@@ -29,7 +29,7 @@ const postsService = {
       
       return response;
     } catch (error) {
-      console.error("❌ postsService.getPosts error:", error);
+      console.error("❌ postService.getPosts error:", error);
       throw error;
     }
   },
@@ -41,12 +41,12 @@ const postsService = {
    */
   toggleLike: async (postId) => {
     try {
-      console.log(`📤 postsService.toggleLike for post ${postId}`);
+      console.log(`📤 postService.toggleLike for post ${postId}`);
       const response = await api.toggleLike(postId);
-      console.log(`📥 postsService.toggleLike response:`, response.data);
+      console.log(`📥 postService.toggleLike response:`, response.data);
       return response;
     } catch (error) {
-      console.error(`❌ postsService.toggleLike error:`, error);
+      console.error(`❌ postService.toggleLike error:`, error);
       throw error;
     }
   },
@@ -61,7 +61,7 @@ const postsService = {
       const response = await api.createPost(postData);
       return response;
     } catch (error) {
-      console.error("❌ postsService.createPost error:", error);
+      console.error("❌ postService.createPost error:", error);
       throw error;
     }
   },
@@ -76,10 +76,10 @@ const postsService = {
       const response = await api.deletePost(postId);
       return response;
     } catch (error) {
-      console.error("❌ postsService.deletePost error:", error);
+      console.error("❌ postService.deletePost error:", error);
       throw error;
     }
   },
 };
 
-export default postsService;
+export default postService;

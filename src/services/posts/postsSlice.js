@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import axios from "axios"
-import postsService from "@/services/posts"
+import postService from "@/services/posts"
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000/api"
 
@@ -8,7 +8,7 @@ export const fetchPosts = createAsyncThunk("posts/fetchPosts", async ({ page = 1
   try {
     console.log(`🔄 fetchPosts thunk called with page: ${page}, maxId: ${maxId}`)
 
-    const res = await postsService.getPosts(page, 10, "for_you", maxId)
+    const res = await postService.getPosts(page, 10, "for_you", maxId)
 
     console.log(`✅ fetchPosts response:`, {
       page,
