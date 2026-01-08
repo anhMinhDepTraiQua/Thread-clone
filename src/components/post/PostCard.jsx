@@ -1,12 +1,12 @@
-import { useState, useRef, useEffect } from "react"; // Thêm useRef và useEffect để đóng menu khi click ngoài
+import { useState, useRef, useEffect } from "react";
 import React from "react";
 import InteractionBar from "./InteractionBar";
+import { NavLink } from "react-router";
 
 export default function PostCard({ post, onLike }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
-  // Đóng menu khi click ra ngoài vùng menu
   useEffect(() => {
     function handleClickOutside(event) {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -28,7 +28,11 @@ export default function PostCard({ post, onLike }) {
             src={post.images[0]} 
             alt="Post media" 
             className="w-full max-h-96 object-cover cursor-pointer hover:opacity-95 transition"
-            onClick={() => window.open(post.images[0], '_blank')}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              window.open(post.images[0], '_blank');
+            }}
           />
         </div>
       );
@@ -43,7 +47,11 @@ export default function PostCard({ post, onLike }) {
               src={img} 
               alt={`Media ${idx + 1}`}
               className="w-full h-64 object-cover cursor-pointer hover:opacity-95 transition"
-              onClick={() => window.open(img, '_blank')}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(img, '_blank');
+              }}
             />
           ))}
         </div>
@@ -57,7 +65,11 @@ export default function PostCard({ post, onLike }) {
             src={post.images[0]} 
             alt="Media 1"
             className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition"
-            onClick={() => window.open(post.images[0], '_blank')}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              window.open(post.images[0], '_blank');
+            }}
           />
           <div className="grid grid-rows-2 gap-2">
             {post.images.slice(1, 3).map((img, idx) => (
@@ -66,7 +78,11 @@ export default function PostCard({ post, onLike }) {
                 src={img} 
                 alt={`Media ${idx + 2}`}
                 className="w-full h-full object-cover cursor-pointer hover:opacity-95 transition"
-                onClick={() => window.open(img, '_blank')}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.open(img, '_blank');
+                }}
               />
             ))}
           </div>
@@ -82,12 +98,20 @@ export default function PostCard({ post, onLike }) {
               src={img} 
               alt={`Media ${idx + 1}`}
               className="w-full h-48 object-cover cursor-pointer hover:opacity-95 transition"
-              onClick={() => window.open(img, '_blank')}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(img, '_blank');
+              }}
             />
             {idx === 3 && imageCount > 4 && (
               <div 
                 className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center cursor-pointer"
-                onClick={() => window.open(img, '_blank')}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.open(img, '_blank');
+                }}
               >
                 <span className="text-white text-2xl font-bold">+{imageCount - 4}</span>
               </div>
@@ -130,7 +154,11 @@ export default function PostCard({ post, onLike }) {
           src={post.media[0]} 
           alt="media" 
           className="w-full rounded-md max-h-80 object-cover cursor-pointer hover:opacity-95 transition"
-          onClick={() => window.open(post.media[0], '_blank')}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.open(post.media[0], '_blank');
+          }}
         />
       </div>
     );
@@ -147,94 +175,106 @@ export default function PostCard({ post, onLike }) {
   ];
 
   return (
-    <article className="bg-white dark:bg-[#1c1e21] px-[24px] py-[16px] shadow-sm border-b border-l border-r border-gray-200 dark:border-gray-700 overflow-visible relative">
-      <div className="flex gap-3">
-        {/* Avatar Section */}
-        <div className="flex-shrink-0">
-          <img
-            src={post.user.avatar || `https://i.pravatar.cc/40?u=${post.user.id}`}
-            alt="avatar"
-            className="w-10 h-10 rounded-full object-cover"
-          />
-        </div>
+    <NavLink to={`/post/${post.id}`} className="block">
+      <article className="bg-white dark:bg-[#1c1e21] px-[24px] py-[16px] shadow-sm border-b border-l border-r border-gray-200 dark:border-gray-700 overflow-visible relative">
+        <div className="flex gap-3">
+          <div className="flex-shrink-0">
+            <img
+              src={post.user.avatar || `https://i.pravatar.cc/40?u=${post.user.id}`}
+              alt="avatar"
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          </div>
 
-        {/* Content Section */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-gray-900 dark:text-white truncate">
-                  {post.user.name}
-                </span>
-                <span className="flex-shrink-0 text-xs text-gray-500 dark:text-gray-400">
-                  · {post.time || "2h"}
-                </span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-900 dark:text-white truncate">
+                    {post.user.name}
+                  </span>
+                  <span className="flex-shrink-0 text-xs text-gray-500 dark:text-gray-400">
+                    · {post.time || "2h"}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            {/* --- MENU DOTS CONTAINER --- */}
-            <div className="relative" ref={menuRef}>
-              <button 
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="flex-shrink-0 p-1 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition hover:bg-gray-100 dark:hover:bg-gray-800 "
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                </svg>
-              </button>
+              <div className="relative" ref={menuRef}>
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsMenuOpen(!isMenuOpen);
+                  }}
+                  className="flex-shrink-0 p-1 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                  </svg>
+                </button>
 
-              {/* Dropdown Box */}
-                      {isMenuOpen && (
-                      <>
-                        <style>{`
-                        @keyframes menuEnter {
-                          from { opacity: 0; transform: translateY(-6px) scale(.95); }
-                          to   { opacity: 1; transform: translateY(0) scale(1); }
-                        }
-                        `}</style>
+                {isMenuOpen && (
+                  <>
+                    <style>{`
+                      @keyframes menuEnter {
+                        from { opacity: 0; transform: translateY(-6px) scale(.95); }
+                        to   { opacity: 1; transform: translateY(0) scale(1); }
+                      }
+                    `}</style>
 
-                        <div
-                        className="absolute right-0 mt-2 w-30 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-10 overflow-hidden"
-                        style={{ animation: 'menuEnter 150ms ease-out forwards' }}
-                        >
-                        <div className="py-1">
-                          {menuItems.map((item, index) => (
+                    <div
+                      className="absolute right-0 mt-2 w-30 bg-white dark:bg-[#242526] border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-10 overflow-hidden"
+                      style={{ animation: 'menuEnter 150ms ease-out forwards' }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                    >
+                      <div className="py-1">
+                        {menuItems.map((item, index) => (
                           <button 
                             key={index}
                             className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors"
-                            onClick={() => {
-                            setIsMenuOpen(false);
-                            if (item.fn) item.fn();
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setIsMenuOpen(false);
+                              if (item.fn) item.fn();
                             }}
                           >
                             <span className={item.color || ""}>{item.label}</span>
                             {item.icon && <i className={`fa-solid ${item.icon} text-xs opacity-60`}></i>}
                           </button>
-                          ))}
-                        </div>
-                        </div>
-                      </>
-                      )}
+                        ))}
+                      </div>
                     </div>
-                    {/* --- END MENU DOTS --- */}
+                  </>
+                )}
+              </div>
+            </div>
+
+            <p className="mt-2 text-sm leading-relaxed text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words">
+              {post.content}
+            </p>
+
+            {renderImages()}
+            {renderAudio()}
+            {renderLegacyMedia()}
+
+            <div onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}>
+              <InteractionBar 
+                stats={post.stats}
+                isLiked={post.isLiked}
+                postId={post.id}
+                onLike={handleLike}
+              />
+            </div>
           </div>
-
-          <p className="mt-2 text-sm leading-relaxed text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words">
-            {post.content}
-          </p>
-
-          {renderImages()}
-          {renderAudio()}
-          {renderLegacyMedia()}
-
-          <InteractionBar 
-            stats={post.stats}
-            isLiked={post.isLiked}
-            postId={post.id}
-            onLike={handleLike}
-          />
         </div>
-      </div>
-    </article>
+      </article>
+    </NavLink>
   );
 }

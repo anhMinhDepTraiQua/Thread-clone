@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import FeedHeader from "@/components/FeedHeader";
-import Modal from "@/components/post/Modal"; // Import Modal component
-import EditProfileModal from "@/components/EditProfile"; // Import EditProfileModal
+import Modal from "@/components/post/Modal";
+import EditProfileModal from "@/components/EditProfile";
 import CreatePost from "@/components/post/CreatePost";
 import { Instagram, BarChart2, PlusCircle } from "lucide-react";
 import axiosClient from "@/utils/httpRequest";
@@ -11,6 +11,7 @@ function Profile() {
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
+  
   useEffect(() => {
     fetchUser();
   }, []);
@@ -45,7 +46,8 @@ function Profile() {
   const displayName = user?.name || username;
   const bio = user?.bio || "welcome to my profile";
   const email = user?.email || "";
-  const hasAvatar = user?.avatar_url || user?.avatar;
+  const userId = user?.id || user?._id || "default";
+  const avatarUrl = user?.avatar_url || user?.avatar || `https://i.pravatar.cc/150?u=${userId}`;
 
   return (
     <div className="flex flex-col">
@@ -63,42 +65,17 @@ function Profile() {
             </div>
           </div>
           <div className="w-[84px] h-[84px] rounded-full overflow-hidden border border-[#2A2A2A]">
-            {hasAvatar ? (
-              <img
-                src={user.avatar_url || user.avatar}
-                alt={`${username}'s profile`}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-[84px] h-[84px] rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-3xl">
-                {displayName.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <img
+              src={avatarUrl}
+              alt={`${username}'s profile`}
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
 
         <div className="mt-4 text-[15px] leading-relaxed">{bio}</div>
 
-        {/* Tags Section */}
-        <div className="flex flex-wrap gap-2 mt-4 text-[#4D4D4D]">
-          {["Gamer", "CS2"].map((tag) => (
-            <span
-              key={tag}
-              className="bg-[#181818] px-3 py-1 rounded-full text-[13px] border border-[#2A2A2A] hover:text-white cursor-pointer"
-            >
-              {tag}
-            </span>
-          ))}
-          <span className="bg-[#002d40] text-[#0095f6] px-3 py-1 rounded-full text-[13px] border border-[#004a6d] flex items-center gap-1 cursor-pointer">
-            <PlusCircle size={14} className="fill-current" /> League of Legends
-          </span>
-          <span className="bg-[#181818] px-3 py-1 rounded-full text-[13px] border border-[#2A2A2A] hover:text-white cursor-pointer">
-            VALORANT
-          </span>
-          <span className="bg-[#181818] w-8 h-8 flex items-center justify-center rounded-full border border-[#2A2A2A] cursor-pointer">
-            +
-          </span>
-        </div>
+
 
         {/* Followers & Social Icons */}
         <div className="flex justify-between items-center mt-6">
@@ -110,7 +87,7 @@ function Profile() {
                   className="w-5 h-5 rounded-full border border-black bg-gray-600 overflow-hidden"
                 >
                   <img
-                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`}
+                    src={`https://i.pravatar.cc/40?u=follower${i}`}
                     alt="follower"
                   />
                 </div>
@@ -174,17 +151,11 @@ function Profile() {
         {/* 3. Quick Post Input */}
         <div className="flex items-center justify-between py-4 border-b border-[#2A2A2A]">
           <div className="flex items-center gap-3">
-            {hasAvatar ? (
-              <img
-                src={user.avatar_url || user.avatar}
-                className="w-9 h-9 rounded-full opacity-80"
-                alt={`${username}'s avatar`}
-              />
-            ) : (
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold text-sm opacity-80">
-                {displayName.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <img
+              src={avatarUrl}
+              className="w-9 h-9 rounded-full opacity-80 object-cover"
+              alt={`${username}'s avatar`}
+            />
             <button onClick={() => setIsCreatePostOpen(true)}>
               <span className="text-[#4D4D4D] text-[15px] cursor-text">Có gì mới?</span>
             </button>

@@ -5,11 +5,11 @@ import Modal from "@/components/post/Modal"
 import CreatePost from "@/components/post/CreatePost"
 import axiosClient from "@/utils/httpRequest"
 import { NavLink } from "react-router-dom"
+
 function WhatAreYouThinking() {
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -22,12 +22,9 @@ function WhatAreYouThinking() {
           return
         }
 
-        // Sử dụng axiosClient thay vì fetch
         const userData = await axiosClient.get("/api/auth/user")
-
         console.log("👤 User data:", userData)
 
-        // API có thể trả về { data: { user } } hoặc trực tiếp user object
         setUser(userData.data?.user || userData.user || userData.data || userData)
       } catch (err) {
         console.error("Error fetching user:", err)
@@ -64,29 +61,26 @@ function WhatAreYouThinking() {
     return null
   }
 
+  const userId = user?.id || user?._id || "default"
+  const avatarUrl = user?.avatar_url || user?.avatar || `https://i.pravatar.cc/150?u=${userId}`
+
   return (
     <div className="px-[24px] py-[16px] bg-white dark:bg-[#1c1e21] border border-gray-200 dark:border-neutral-700 rounded-tl-[20px] rounded-br-[0] rounded-tr-[20px] rounded-bl-[0]">
       <div className="flex justify-between">
         <div className="flex justify-center items-center">
-          <div className="w-10 h-10 bg-gray-300 rounded-full inline-block overflow-hidden">
-            <button>
-              <NavLink to="/profile">
-                {user?.avatar_url || user?.avatar ? (
-                  <img
-                    src={user.avatar_url || user.avatar}
-                    alt={user.name || user.username || "User avatar"}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold">
-                    {user?.name?.charAt(0).toUpperCase() || user?.username?.charAt(0).toUpperCase() || "U"}
-                  </div>
-                )}
-              </NavLink>
-            </button>
-          </div>
-          <button type="button" onClick={() => setIsCreatePostOpen(true)} className="outline-none select-none">
-            <span className="ml-2 text-gray-500 dark:text-gray-400 w-[300px] cursor-text text-left inline-block">
+          <NavLink to="/profile" className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+            <img
+              src={avatarUrl}
+              alt={user?.name || user?.username || "User avatar"}
+              className="w-full h-full object-cover"
+            />
+          </NavLink>
+          <button 
+            type="button" 
+            onClick={() => setIsCreatePostOpen(true)} 
+            className="outline-none select-none ml-2"
+          >
+            <span className="text-gray-500 dark:text-gray-400 w-[300px] cursor-text text-left inline-block">
               What are you thinking?
             </span>
           </button>
@@ -97,7 +91,7 @@ function WhatAreYouThinking() {
         </Modal>
 
         <button
-          className="border border-neutral-700 cursor-pointer text-white px-4 py-1 rounded-[10px] text-sm hover:bg-neutral-800 transition-colors"
+          className="border border-neutral-700 cursor-pointer text-white px-4 py-1 rounded-[10px] text-sm hover:bg-neutral-800 transition-colors flex-shrink-0"
           onClick={() => setIsCreatePostOpen(true)}
         >
           Post

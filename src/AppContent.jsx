@@ -1,7 +1,7 @@
 import { Routes, Route, useLocation } from "react-router-dom";
-import DefaultLayout from "@/components/layouts/DefaultLayout";
+import DefaultLayout from "@/layouts/DefaultLayout";
 import FeedHeader from "@/components/FeedHeader";
-import AuthLayout from "@/components/layouts/AuthLayout";
+import AuthLayout from "@/layouts/AuthLayout";
 import Home from "@/pages/Home";
 import Search from "@/pages/Search";
 import Notifications from "@/pages/Notifications";
@@ -10,10 +10,12 @@ import Login from "@/pages/Auth/Login";
 import Register from "@/pages/Auth/Register";
 import ForgotPassword from "@/pages/Auth/ForgotPassword";
 import ResetPassword from "@/pages/Auth/ResetPassword";
+import VerifyEmail from "@/pages/Auth/VerifyEmail";
 import ModalLayout from "@/components/post/Modal";
 import CreatePost from "@/components/post/CreatePost";
 import EditProfileModal from "./components/EditProfile";
 import ReplyModal from "./components/post/ReplyModal";
+import PostDetail from "./pages/Post/PostDetail";
 import { useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { navigationService } from './utils/navigation';
@@ -34,6 +36,7 @@ export default function AppContent() {
         <Route path="/search" element={<Search />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/post/:postId" element={<PostDetail />} />
       </Route>
 
       {/* Nhóm các trang sử dụng AuthLayout */}
@@ -42,6 +45,7 @@ export default function AppContent() {
         <Route path="/Register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
       </Route>
       {/* Nhóm các trang sử dụng ModalLayout */}
       <Route element={<ModalLayout />}>

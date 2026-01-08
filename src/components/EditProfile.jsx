@@ -58,7 +58,11 @@ const EditProfileModal = ({ onClose }) => {
       setName(userInfo?.name || '');
       setUsername(userInfo?.username || '');
       setBio(userInfo?.bio || '');
-      setAvatarPreview(userInfo?.avatar_url || userInfo?.avatar || null);
+      
+      // Sử dụng pravatar với username/email để đồng bộ
+      const userId = userInfo?.username || userInfo?.email || userInfo?.id || userInfo?._id || "default";
+      const defaultAvatar = `https://i.pravatar.cc/150?u=${userId}`;
+      setAvatarPreview(userInfo?.avatar_url || userInfo?.avatar || defaultAvatar);
     } catch (err) {
       console.error('Error fetching user:', err);
       setError('Không thể tải thông tin người dùng');
@@ -187,7 +191,6 @@ const EditProfileModal = ({ onClose }) => {
   }
 
   const displayName = name || username || 'User';
-  const hasAvatar = avatarPreview;
 
   return (
     <div className="w-full max-w-[620px] mx-auto bg-black text-white p-4 rounded-3xl border border-[#2A2A2A] shadow-2xl overflow-hidden">
@@ -250,17 +253,11 @@ const EditProfileModal = ({ onClose }) => {
         </div>
         <div className="relative group">
           <div className="w-[60px] h-[60px] rounded-full overflow-hidden bg-[#2A2A2A]">
-            {hasAvatar ? (
-              <img 
-                src={avatarPreview}
-                alt="profile" 
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl rounded-full">
-                {displayName.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <img 
+              src={avatarPreview}
+              alt="profile" 
+              className="w-full h-full object-cover"
+            />
           </div>
           {/* Tạm thời disable upload avatar */}
           <div 

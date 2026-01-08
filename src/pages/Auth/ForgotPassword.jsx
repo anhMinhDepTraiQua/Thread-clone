@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "@/utils/httpRequest";
 import { NavLink } from "react-router-dom";
+
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,19 @@ export default function ForgotPassword() {
 
     try {
       setLoading(true);
-      await axios.post("/api/auth/forgot-password", { email });
+      
+      // Lấy origin hiện tại của trang web
+      const origin = window.location.origin + '/Thread-clone';
+      
+      await axios.post(
+        "/api/auth/forgot-password", 
+        { email },
+        {
+          headers: {
+            'x-origin': origin
+          }
+        }
+      );
 
       setMessage("Liên kết đặt lại mật khẩu đã được gửi tới email của bạn.");
     } catch (err) {

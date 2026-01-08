@@ -1,6 +1,7 @@
-// src/utils/axiosClient.js
+// src/utils/axiosClient.js (hoặc httpRequest.js)
 import axios from "axios";
 import { navigationService } from "./navigation";
+
 const BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://threads.f8team.dev";
 
@@ -58,7 +59,6 @@ axiosClient.interceptors.response.use(
             refresh_token: refresh,
           });
 
-          // API có thể trả về access_token (snake_case)
           const { access_token, accessToken } = res.data.data || res.data;
           const newToken = access_token || accessToken;
 
@@ -74,7 +74,7 @@ axiosClient.interceptors.response.use(
           isRefreshing = false;
 
           localStorage.clear();
-          navigationService.navigateToLogin(); // Sử dụng service
+          navigationService.navigateToLogin();
           return Promise.reject(err);
         }
       }
@@ -88,11 +88,12 @@ axiosClient.interceptors.response.use(
   }
 );
 
+// ✅ CẬP NHẬT: Thêm tham số config cho tất cả methods
 export const httpRequest = {
-  get: (url, params) => axiosClient.get(url, { params }),
-  post: (url, body) => axiosClient.post(url, body),
-  put: (url, body) => axiosClient.put(url, body),
-  delete: (url) => axiosClient.delete(url),
+  get: (url, params, config) => axiosClient.get(url, { params, ...config }),
+  post: (url, body, config) => axiosClient.post(url, body, config), // ← Thêm config
+  put: (url, body, config) => axiosClient.put(url, body, config),   // ← Thêm config
+  delete: (url, config) => axiosClient.delete(url, config),          // ← Thêm config
 };
 
 export default axiosClient;

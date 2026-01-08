@@ -92,121 +92,127 @@ export default function Register() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Reset messages
-    setSuccessMessage('');
-    
-    // Validate all fields
-    const newErrors = {};
-    
-    if (!formData.displayName.trim()) {
-      newErrors.displayName = 'Vui lòng nhập tên hiển thị';
-    } else if (formData.displayName.length < 3) {
-      newErrors.displayName = 'Tên hiển thị phải có ít nhất 3 ký tự';
-    } else if (formData.displayName.length > 50) {
-      newErrors.displayName = 'Tên hiển thị không được quá 50 ký tự';
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  // Reset messages
+  setSuccessMessage('');
+  
+  // Validate all fields
+  const newErrors = {};
+  
+  if (!formData.displayName.trim()) {
+    newErrors.displayName = 'Vui lòng nhập tên hiển thị';
+  } else if (formData.displayName.length < 3) {
+    newErrors.displayName = 'Tên hiển thị phải có ít nhất 3 ký tự';
+  } else if (formData.displayName.length > 50) {
+    newErrors.displayName = 'Tên hiển thị không được quá 50 ký tự';
+  }
+  
+  if (!formData.email.trim()) {
+    newErrors.email = 'Vui lòng nhập email';
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    newErrors.email = 'Email không hợp lệ';
+  }
+  
+  if (!formData.password) {
+    newErrors.password = 'Vui lòng nhập mật khẩu';
+  } else {
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) {
+      newErrors.password = passwordError;
     }
+  }
+  
+  if (!formData.confirmPassword) {
+    newErrors.confirmPassword = 'Vui lòng xác nhận mật khẩu';
+  } else if (formData.password !== formData.confirmPassword) {
+    newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
+  }
+  
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    return;
+  }
+  
+  // Call API
+  setIsSubmitting(true);
+  
+  try {
+    // Lấy origin và thêm path base
+    const origin = window.location.origin + '/Thread-clone';
     
-    if (!formData.email.trim()) {
-      newErrors.email = 'Vui lòng nhập email';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Email không hợp lệ';
-    }
-    
-    if (!formData.password) {
-      newErrors.password = 'Vui lòng nhập mật khẩu';
-    } else {
-      const passwordError = validatePassword(formData.password);
-      if (passwordError) {
-        newErrors.password = passwordError;
+    await httpRequest.post('/api/auth/register', {
+      username: formData.displayName.trim(),
+      email: formData.email.trim(),
+      password: formData.password,
+      password_confirmation: formData.confirmPassword
+    }, {
+      headers: {
+        'x-origin': origin  // ← Thêm header này
       }
-    }
+    });
     
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Vui lòng xác nhận mật khẩu';
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
-    }
+    // Success
+    setSuccessMessage('Chúng tôi đã gửi một liên kết xác thực tới email của bạn. Vui lòng kiểm tra email để xác thực tài khoản.');
+    setFormData({
+      displayName: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    });
+    setErrors({});
     
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
+  } catch (error) {
+    console.error('=== Registration error ===');
+    console.error('Error:', error);
+    console.error('Error response:', error?.response);
+    console.error('Error response data:', error?.response?.data);
     
-    // Call API
-    setIsSubmitting(true);
-    
-    try {
-      await httpRequest.post('/api/auth/register', {
-        username: formData.displayName.trim(),  // API expects 'username' not 'display_name'
-        email: formData.email.trim(),
-        password: formData.password,
-        password_confirmation: formData.confirmPassword
-      });
+    // Handle axios error with response data
+    if (error?.response?.data) {
+      const serverData = error.response.data;
       
-      // Success
-      setSuccessMessage('Chúng tôi đã gửi một liên kết xác thực tới email của bạn. Vui lòng kiểm tra email để xác thực tài khoản.');
-      setFormData({
-        displayName: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-      });
-      setErrors({});
-      
-    } catch (error) {
-      console.error('=== Registration error ===');
-      console.error('Error:', error);
-      console.error('Error response:', error?.response);
-      console.error('Error response data:', error?.response?.data);
-      
-      // Handle axios error with response data
-      if (error?.response?.data) {
-        const serverData = error.response.data;
+      // Handle validation errors from server
+      if (serverData.errors) {
+        const serverErrors = {};
         
-        // Handle validation errors from server
-        if (serverData.errors) {
-          const serverErrors = {};
+        // Map server error keys to form field names
+        Object.keys(serverData.errors).forEach(key => {
+          const errorMessages = serverData.errors[key];
+          const errorMessage = Array.isArray(errorMessages) ? errorMessages[0] : errorMessages;
           
-          // Map server error keys to form field names
-          Object.keys(serverData.errors).forEach(key => {
-            const errorMessages = serverData.errors[key];
-            const errorMessage = Array.isArray(errorMessages) ? errorMessages[0] : errorMessages;
-            
-            if (key === 'username' || key === 'display_name') {
-              serverErrors.displayName = errorMessage;
-            } else if (key === 'email') {
-              serverErrors.email = errorMessage;
-            } else if (key === 'password') {
-              serverErrors.password = errorMessage;
-            } else if (key === 'password_confirmation') {
-              serverErrors.confirmPassword = errorMessage;
-            } else {
-              if (!serverErrors.general) {
-                serverErrors.general = errorMessage;
-              }
+          if (key === 'username' || key === 'display_name') {
+            serverErrors.displayName = errorMessage;
+          } else if (key === 'email') {
+            serverErrors.email = errorMessage;
+          } else if (key === 'password') {
+            serverErrors.password = errorMessage;
+          } else if (key === 'password_confirmation') {
+            serverErrors.confirmPassword = errorMessage;
+          } else {
+            if (!serverErrors.general) {
+              serverErrors.general = errorMessage;
             }
-          });
-          
-          setErrors(serverErrors);
-        } else if (serverData.message) {
-          setErrors({ general: serverData.message });
-        } else {
-          setErrors({ general: 'Đã có lỗi xảy ra. Vui lòng thử lại sau.' });
-        }
-      } else if (typeof error === 'string') {
-        // Simple string error message
-        setErrors({ general: error });
+          }
+        });
+        
+        setErrors(serverErrors);
+      } else if (serverData.message) {
+        setErrors({ general: serverData.message });
       } else {
-        // Unknown error format
-        setErrors({ general: error?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại sau.' });
+        setErrors({ general: 'Đã có lỗi xảy ra. Vui lòng thử lại sau.' });
       }
-    } finally {
-      setIsSubmitting(false);
+    } else if (typeof error === 'string') {
+      setErrors({ general: error });
+    } else {
+      setErrors({ general: error?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại sau.' });
     }
-  };
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="w-full max-w-sm px-4 mx-auto">

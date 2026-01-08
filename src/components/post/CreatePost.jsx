@@ -122,7 +122,8 @@ const CreatePost = ({ user: propUser, onClose, onPostCreated }) => {
 
   const username = user?.username || 'User';
   const displayName = user?.name || username;
-  const hasAvatar = user?.avatar_url || user?.avatar;
+  const userId = user?.id || user?._id || "default";
+  const avatarUrl = user?.avatar_url || user?.avatar || `https://i.pravatar.cc/150?u=${userId}`;
 
   return (
     <div className="w-full max-w-[620px] bg-[#181818] rounded-3xl border border-[#2A2A2A] shadow-2xl flex flex-col overflow-hidden mx-auto">
@@ -151,31 +152,19 @@ const CreatePost = ({ user: propUser, onClose, onPostCreated }) => {
           {/* Avatar & Line */}
           <div className="flex flex-col items-center shrink-0">
             <div className="w-10 h-10 rounded-full bg-[#2A2A2A] overflow-hidden">
-              {hasAvatar ? (
-                <img 
-                  src={user.avatar_url || user.avatar}
-                  alt={`${username}'s avatar`}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold text-sm">
-                  {displayName.charAt(0).toUpperCase()}
-                </div>
-              )}
+              <img 
+                src={avatarUrl}
+                alt={`${username}'s avatar`}
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="w-[2px] grow bg-[#2A2A2A] my-2 rounded-full min-h-[40px]"></div>
             <div className="w-5 h-5 rounded-full bg-[#2A2A2A] overflow-hidden opacity-50">
-              {hasAvatar ? (
-                <img 
-                  src={user.avatar_url || user.avatar}
-                  alt="sub-avatar" 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold text-[10px]">
-                  {displayName.charAt(0).toUpperCase()}
-                </div>
-              )}
+              <img 
+                src={avatarUrl}
+                alt="sub-avatar" 
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
 

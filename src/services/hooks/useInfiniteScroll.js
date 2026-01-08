@@ -49,7 +49,7 @@ const useInfiniteScroll = (
         isLoading
       });
       
-      // Nếu sentinel element đang visible và có thể load thêm
+      // CHỈ gọi callback nếu đang succeeded, KHÔNG gọi khi failed
       if (entry.isIntersecting && hasMore && !isLoading) {
         console.log("useInfiniteScroll: Calling callback to load more");
         memoizedCallback();
