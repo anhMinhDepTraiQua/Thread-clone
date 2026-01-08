@@ -1,5 +1,5 @@
 import { Routes, Route, useLocation } from "react-router-dom";
-import DefaultLayout from "@/layouts/DefaultLayout";
+import DefaultLayout from "@/layouts/DefaultLayout/index";
 import FeedHeader from "@/components/FeedHeader";
 import AuthLayout from "@/layouts/AuthLayout";
 import Home from "@/pages/Home";
